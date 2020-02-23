@@ -78,7 +78,15 @@ plot(SMA(MTemp5.9.ts,n=20))
 
 ## 2.1.2 plot the climate variability data -----------------
 library(plotrix)
-tiff("./plot/Figure 1 color. Climate in the sampling site.tiff",width=18,height = 21,units = "cm",compression = "lzw",res = 400)
+mpre<-apply(Pre[-1],2,mean)/10
+mtmean<- apply(MTemp[-1],2,mean)/10
+mRH <- apply(Rh[-1],2,mean)
+
+ea=6.112*exp(17.67*mtmean/(mtmean+243.5))# The unit of tem should be degree, the unit of ea is hpa.
+# ea=610.7*10^((7.5*mtmean/(237.3+mtmean)))
+mVPD <- ea*((1-mRH/100))/10  ## change unit as kPa
+
+tiff("./plot/Figure 2. Climate in the sampling site.tiff",width=18,height = 21,units = "cm",compression = "lzw",res = 400)
 windowsFonts(TN = windowsFont("Times New Roman"))  
 par(mfcol=c(2,1),mgp=c(2.0,0.5,0),family="TN",ps=13)
 par(mar=c(3, 3, 0.5, 7) + 0.1)
@@ -91,13 +99,19 @@ plot(mp[,1],apply(MTemp[-1],2,mean)/10,xlim=c(0.5,11.5),type="b",col="red",axes=
 
 # We use the "pretty" function go generate nice axes
 axis(at = pretty(c(-15:20)), side = 4,col=2)
-mtext(4,text="Temperature (¡æ)",col="red",line=2)
+mtext(4,text="Temperature (â„ƒ)",col="red",line=2)
 par(new=TRUE)
 plot(mp[,1],apply(Rh[-1],2,mean),xlim=c(0.5,11.5),type="b",pch=2,col="blue",axes=FALSE,ylim=c(20,90),ann=FALSE)
 axis(at = pretty(c(20:90)), side = 4,col="blue",line =3.5)
 mtext(4,text="Relative humidity (%)",col="blue",line=5)
-box()
 text(0.5,88,labels = "a",cex = 2.5,font= 2)
+
+par(new=TRUE)
+plot(mp[,1],mVPD,xlim=c(0.5,11.5),type="b",pch=15,col="orange",axes=FALSE,ylim=c(0,1),ann=FALSE)
+axis(ylim=c(0,1), side = 4,col="orange",line =6.5)
+mtext(4,text="VPD (kPa)",col="orange",line=8)
+box()
+
 
 par(mar=c(3, 3, 0, 7) + 0.1,xaxs="i")
 
@@ -109,12 +123,12 @@ plot(t(MTemp[1]),Pre5.9,xlim = c(1954,2010),"l",
 box()
 par(new=TRUE)
 plot(t(MTemp[1]),MTemp5.9,xlim=c(1954,2010),"l",ylim=c(9,17),axes=F,ann=FALSE,col=2,
-     xlab = "Year",ylab = "Temperature (¡æ)")
+     xlab = "Year",ylab = "Temperature (â„ƒ)")
 axis(at = pretty(c(9:17)), side = 4,col=2)
 abline(lm(MTemp5.9[c(1:57)]~c(1954:2010)),lty=2,col=2)
 # text(1980,9.5,labels = expression(paste(italic("slope"), "= 0.034, ", italic("R")^"2", "= 0.44, ", italic(" p"), " < 0.001")),col=2)
 text(1980,9.5,labels = expression(paste(italic("Sen's slope"), "= 0.035, ",  italic(" p"), " < 0.001")),col=2)
-mtext(4,text="Temperature (¡æ)",col="red",line=2)
+mtext(4,text="Temperature (â„ƒ)",col="red",line=2)
 
 par(new=TRUE)
 plot(t(MTemp[1]),Rh5.9,xlim=c(1954,2010),type="l",col="blue",axes=FALSE,ylim=c(50,90),ann=FALSE)
@@ -193,7 +207,7 @@ summary(glht(ccor.aov, linfct = mcp(variable = "Tukey")))
    stat_summary(fun.y=mean, colour="orange", geom="point", 
                shape=18, size=3,show.legend = FALSE) + 
   labs(title=" ",x="Age group", 
-       y = expression(paste(delta ^13,"C (¡ë)")))+
+       y = expression(paste(delta ^13,"C (â€°)")))+
    theme(legend.position = "none",
          plot.margin = unit(c(-0.4,0.10,-0.5,-0.1),"cm"))+
    mythemeplot()+
@@ -212,7 +226,7 @@ summary(glht(ccor.aov, linfct = mcp(variable = "Tukey")))
    stat_summary(fun.y=mean, colour="orange", geom="point", 
                shape=18, size=3,show.legend = FALSE) + 
   labs(title=" ",x="Age group", 
-       y = expression(paste(delta ^13,"C (¡ë)")))+
+       y = expression(paste(delta ^13,"C (â€°)")))+
    theme(legend.position = "none",
          plot.margin = unit(c(-0.2,0.1,-0.5,-0.1),"cm"))+
    mythemeplot()+
@@ -232,7 +246,7 @@ summary(glht(ccor.aov, linfct = mcp(variable = "Tukey")))
                shape=18, size=3,show.legend = FALSE) + 
    
   labs(title=" ",x="Age group", 
-       y = expression(paste(delta ^18,"O (¡ë)")))+
+       y = expression(paste(delta ^18,"O (â€°)")))+
    theme(legend.position = "none",
          plot.margin = unit(c(-0.1,0.10,0.0,-0.1),"cm"))+
    mythemeplot()+
@@ -300,7 +314,7 @@ bbsmk(pin.o,ci = 0.95,nsim = 2000,eta = 1)
 ccor.p<- ggplot(data=ccorall,aes(x=year,y=value,color=variable))+
                  geom_line()+
        labs(title=" ",x=" ", 
-       y = expression(paste(delta ^13,"C (¡ë)")))+
+       y = expression(paste(delta ^13,"C (â€°)")))+
        geom_smooth(method = "lm", se = FALSE,linetype=2)+
        scale_x_continuous(expand=c(0.01,0.02))+
        annotate("text", x = 1940, y=c(-20.9,-20.6,-20.3), 
@@ -317,7 +331,7 @@ ccor.p<- ggplot(data=ccorall,aes(x=year,y=value,color=variable))+
 pin.p<- ggplot(data=pinall,aes(x=year,y=value,color=variable))+
                  geom_line()+
        labs(title=" ",x=" ", 
-       y = expression(paste(delta ^13,"C (¡ë)")))+
+       y = expression(paste(delta ^13,"C (â€°)")))+
        geom_smooth(method = "lm", se = FALSE,linetype=2)+
        scale_x_continuous(expand=c(0.01,0.02))+
        annotate("text", x = 1940, y=c(-20.9,-20.6,-20.3), 
@@ -334,7 +348,7 @@ pin.p<- ggplot(data=pinall,aes(x=year,y=value,color=variable))+
   oxy.p<- ggplot(data=oxyall,aes(x=Year,y=value,color=variable))+
                  geom_line()+
        labs(title=" ",x="Year", 
-       y = expression(paste(delta ^18,"O (¡ë)")))+
+       y = expression(paste(delta ^18,"O (â€°)")))+
        scale_x_continuous(expand=c(0.01,0.02))+
   mythemeplot()+
   theme(legend.title = element_blank(), 
@@ -2278,7 +2292,7 @@ young.rwi <- subset(TRW.allrwi,
 young.rwimean <-apply(young.rwi,1,FUN=mean,na.rm=TRUE)
 
 mid.rwi <- subset(TRW.allrwi,
-              select=c('AWL1-13B','AWL1-17','AWL1-19','AWL1-22A'))#AWL1-13B,AWL1-17£¬19, 22A
+              select=c('AWL1-13B','AWL1-17','AWL1-19','AWL1-22A'))#AWL1-13B,AWL1-17ï¼Œ19, 22A
 
 mid.rwimean <-apply(mid.rwi,1,FUN=mean,na.rm=TRUE)
 
@@ -2343,7 +2357,7 @@ young2 <- subset(AWL3,select=c('AWL3-1A','AWL3-2B'))
 young.trw <- cbind(subset(young,rownames(young)>1909),subset(young2,rownames(young2)>1909))
 summary(apply(young.trw,1,FUN=mean,na.rm=TRUE))
 
-mid <- subset(AWL1,select=c('AWL1-13B','AWL1-17','AWL1-19','AWL1-22A'))#AWL1-13B,AWL1-17£¬19, 22A
+mid <- subset(AWL1,select=c('AWL1-13B','AWL1-17','AWL1-19','AWL1-22A'))#AWL1-13B,AWL1-17ï¼Œ19, 22A
 mid.trw <- subset(mid,rownames(mid)>1909)
 summary(apply(mid.trw,1,FUN=mean,na.rm=TRUE))
 
